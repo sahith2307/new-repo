@@ -1,5 +1,6 @@
 const multer = require("multer");
 const path = require("path");
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const pathName = path.join(__dirname, "../postFiles");

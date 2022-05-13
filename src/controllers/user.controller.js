@@ -3,6 +3,8 @@ const pick = require("../utils/pick");
 const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
 const { userService } = require("../services");
+const User = require("../models/user.model");
+const { uploadToCloudinary } = require("../services/upload.service");
 
 const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser({
@@ -13,7 +15,7 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const getUsers = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ["name", "role"]);
+  const filter = pick(req.query, ["name"]);
   const options = pick(req.query, ["sortBy", "limit", "page"]);
   const result = await userService.queryUsers(filter, {
     ...options,
@@ -51,6 +53,20 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const uploadProfilePicture = async (req, res) => {
+  const { _id } = req.user;
+  try {
+    let localFilePath = req.file.path;
+    let result = await uploadToCloudinary(localFilePath, "profileImages");
+    await User.findOneAndUpdate({ _id: _id }, { $set: { image: result.url } });
+
+    res.status(201).send({ success: true, massage: "image updated" });
+  } catch (error) {
+    error.status = 400;
+    next(error);
+  }
+};
+
 module.exports = {
   createUser,
   getUsers,
@@ -58,4 +74,5 @@ module.exports = {
   updateUser,
   deleteUser,
   updateOrg,
+  uploadProfilePicture,
 };

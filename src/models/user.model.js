@@ -12,6 +12,12 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    bio: { type: String, required: false },
+    gender: {
+      type: String,
+      required: true,
+      enum: ["Male", "Female", "Others", "None"],
+    },
     email: {
       type: String,
       required: true,
@@ -42,12 +48,19 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    mobile: {
+      type: String,
+      validate: [validateNumber, "invalid number"],
+    },
   },
   {
     timestamps: true,
   }
 );
-
+function validateNumber(value) {
+  console.log(value);
+  return validatePhoneNumber.validate(value);
+}
 userSchema.plugin(softDelete);
 userSchema.plugin(private);
 userSchema.plugin(paginate);

@@ -10,6 +10,12 @@ router.use(auth());
 
 router
   .route("/")
-  .post(upload.single("image"), postController.uploadPost)
-  .get(upload.single("image"), postController.getAllPosts);
+  .post(upload.array("image", 12), postController.uploadPost)
+  .get(postController.getAllPosts);
+router.get("/self", postController.getUserPosts);
+router.get("/:userId", postController.getUserIdPosts);
+router
+  .route("/like/:postId")
+  .post(postController.likePost)
+  .delete(postController.dislikePost);
 module.exports = router;

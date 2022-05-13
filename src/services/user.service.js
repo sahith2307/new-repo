@@ -1,9 +1,6 @@
-const httpStatus = require('http-status');
-const {
-  User,
-  Organization
-} = require('../models');
-const ApiError = require('../utils/ApiError');
+const httpStatus = require("http-status");
+const { User, Organization } = require("../models");
+const ApiError = require("../utils/ApiError");
 
 /**
  * Create an organization
@@ -12,7 +9,10 @@ const ApiError = require('../utils/ApiError');
  */
 const createOrg = async (orgBody) => {
   if (await Organization.isEmailTaken(orgBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Organization already exists with this email');
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Organization already exists with this email"
+    );
   }
   return Organization.create({ ...orgBody, name: orgBody.company });
 };
@@ -24,9 +24,12 @@ const createOrg = async (orgBody) => {
  */
 const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'User already exists with this email');
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "User already exists with this email"
+    );
   }
-  return User.create(userBody);
+  return User.create({ ...userBody, gender: "None" });
 };
 
 /**
@@ -59,7 +62,7 @@ const getUserById = async (id) => {
  */
 const getUserByEmail = async (email) => {
   return User.findOne({
-    email
+    email,
   });
 };
 
@@ -72,10 +75,13 @@ const getUserByEmail = async (email) => {
 const updateUserById = async (userId, updateBody) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'User not found');
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'User already exists with this email');
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "User already exists with this email"
+    );
   }
   Object.assign(user, updateBody);
   await user.save();
@@ -91,10 +97,16 @@ const updateUserById = async (userId, updateBody) => {
 const updateOrgById = async (orgId, updateBody) => {
   const org = await Organization.findById(orgId);
   if (!org) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Organization not found');
+    throw new ApiError(httpStatus.BAD_REQUEST, "Organization not found");
   }
-  if (updateBody.email && (await Organization.isEmailTaken(updateBody.email, orgId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Organization already exists with this email');
+  if (
+    updateBody.email &&
+    (await Organization.isEmailTaken(updateBody.email, orgId))
+  ) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Organization already exists with this email"
+    );
   }
   Object.assign(org, updateBody);
   await org.save();
@@ -109,7 +121,7 @@ const updateOrgById = async (orgId, updateBody) => {
 const deleteUserById = async (userId) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'User not found');
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
   await user.delete();
   return user;
@@ -124,4 +136,5 @@ module.exports = {
   updateUserById,
   updateOrgById,
   deleteUserById,
+  
 };

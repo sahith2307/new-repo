@@ -29,6 +29,25 @@ async function uploadToCloudinary(localFilePath, folderName) {
       return { message: "Fail" };
     });
 }
+const multipleImages = async (paths, folderName) => {
+  // req.files is array of `profile-files` files
+  // req.body will contain the text fields,
+  // if there were any
+  var imageUrlList = [];
+
+  for (var i = 0; i < paths.length; i++) {
+    let locaFilePath = paths[i].path;
+
+    // Upload the local image to Cloudinary
+    // and get image url as response
+    let result = await uploadToCloudinary(locaFilePath, folderName);
+    imageUrlList.push(result.url);
+  }
+
+  return imageUrlList;
+};
+
 module.exports = {
+  multipleImages,
   uploadToCloudinary, //localFilePath, folderName is required
 };

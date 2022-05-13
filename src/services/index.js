@@ -6,3 +6,4 @@ module.exports.tokenService = require("./token.service");
 module.exports.userService = require("./user.service");
 module.exports.uploadService = require("./upload.service");
 module.exports.postsService = require("./posts.service");
+module.exports.commentsService = require("./comments.service");
