@@ -1,10 +1,12 @@
 const httpStatus = require("http-status");
 const catchAsync = require("../utils/catchAsync");
+//dsksdksk
 const {
   authService,
   userService,
   tokenService,
   emailService,
+  googleService,
 } = require("../services");
 
 const register = catchAsync(async (req, res) => {
@@ -30,6 +32,16 @@ const register = catchAsync(async (req, res) => {
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
+  const { token, expires } = await tokenService.generateAuthTokens(user);
+  res.send({
+    user,
+    token,
+    expires,
+  });
+});
+const googleLogin = catchAsync(async (req, res, next) => {
+  const email = await googleService.googleAuth(req.body.idToken, next);
+  const user = await authService.loginUserWithGoogle(email);
   const { token, expires } = await tokenService.generateAuthTokens(user);
   res.send({
     user,
