@@ -35,27 +35,6 @@ const getComments = async (req, res, next) => {
   }
 };
 
-//this function will edit comment
-const updateComment = async (req, res, next) => {
-  const { postId, commentId } = req.params;
-  const { comment } = req.body;
-  const { id } = req.user;
-  try {
-    const commenter = await Comments.updateOne(
-      {
-        $and: [{ createdBy: id }, { postId: postId }, { _id: commentId }],
-      },
-      { $set: { comment: comment } }
-    );
-    if (!commenter) {
-      res.status(400).send("user doesn't have access to update");
-    }
-    res.status(200).send({ message: "post updated successfully" });
-  } catch (error) {
-    error.status = 400;
-    next(error);
-  }
-};
 
 //This function will Add like to function (pull method)
 const likeComment = async (req, res, next) => {
