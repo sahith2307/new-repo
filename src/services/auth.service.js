@@ -1,9 +1,9 @@
-const httpStatus = require('http-status');
-const tokenService = require('./token.service');
-const userService = require('./user.service');
-const Token = require('../models/token.model');
-const ApiError = require('../utils/ApiError');
-const { tokenTypes } = require('../config/tokens');
+const httpStatus = require("http-status");
+const tokenService = require("./token.service");
+const userService = require("./user.service");
+const Token = require("../models/token.model");
+const ApiError = require("../utils/ApiError");
+const { tokenTypes } = require("../config/tokens");
 
 /**
  * Login with username and password
@@ -14,9 +14,17 @@ const { tokenTypes } = require('../config/tokens');
 const loginUserWithEmailAndPassword = async (email, password) => {
   const user = await userService.getUserByEmail(email);
   if (!user || user.deleted || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
   }
-  return await user.populate("_org", "name email");
+  return await user.populate("name email");
+};
+
+const loginUserWithGoogle = async (email) => {
+  const user = await userService.getUserByEmail(email);
+  if (!user || user.deleted) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email");
+  }
+  return await user.populate("name email");
 };
 
 /**
@@ -27,7 +35,10 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  */
 const resetPassword = async (resetPasswordToken, newPassword) => {
   try {
-    const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
+    const resetPasswordTokenDoc = await tokenService.verifyToken(
+      resetPasswordToken,
+      tokenTypes.RESET_PASSWORD
+    );
     const user = await userService.getUserById(resetPasswordTokenDoc.user);
     if (!user) {
       throw new Error();
@@ -35,7 +46,27 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
     await userService.updateUserById(user.id, { password: newPassword });
     await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Password reset failed");
+  }
+};
+
+const setNewPassword = async (email, password, newPassword) => {
+  const user = await userService.getUserByEmail(email);
+  try {
+    if (!user) {
+      throw new Error();
+    }
+    const hashed = await user.isPasswordMatch(password);
+
+    if (hashed) {
+      await userService.updateUserById(user.id, { password: newPassword });
+      return true;
+    } else {
+      return false;
+    }
+    await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
+  } catch (error) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Password reset failed");
   }
 };
 
@@ -46,7 +77,10 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
  */
 const verifyEmail = async (verifyEmailToken) => {
   try {
-    const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
+    const verifyEmailTokenDoc = await tokenService.verifyToken(
+      verifyEmailToken,
+      tokenTypes.VERIFY_EMAIL
+    );
     const user = await userService.getUserById(verifyEmailTokenDoc.user);
     if (!user) {
       throw new Error();
@@ -54,12 +88,14 @@ const verifyEmail = async (verifyEmailToken) => {
     await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
     await userService.updateUserById(user.id, { isEmailVerified: true });
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Email verification failed");
   }
 };
 
 module.exports = {
   loginUserWithEmailAndPassword,
+  loginUserWithGoogle,
   resetPassword,
   verifyEmail,
+  setNewPassword,
 };

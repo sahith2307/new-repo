@@ -14,7 +14,7 @@ const jwtVerify = async (payload, done) => {
       throw new Error('Invalid token type');
     }
     const user = await User.findById(payload.sub)
-      .populate("_org", "name email");
+      // .populate("_org", "name email");
     if (!user || user.deleted) {
       return done(null, false);
     }

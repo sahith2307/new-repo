@@ -12,6 +12,7 @@ router.post(
   authController.register
 );
 router.post("/login", validate(authValidation.login), authController.login);
+router.post("/google-login", authController.googleLogin);
 router.post(
   "/forgot-password",
   validate(authValidation.forgotPassword),
@@ -26,6 +27,12 @@ router.post(
   "/send-verification-email",
   auth(),
   authController.sendVerificationEmail
+);
+router.put(
+  "/update-password",
+  auth(),
+  validate(authValidation.newPassword),
+  authController.updatePassword
 );
 router.post(
   "/verify-email",

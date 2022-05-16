@@ -1,8 +1,9 @@
-const express = require('express');
-const auth = require('../middlewares/auth');
-const validate = require('../middlewares/validate');
-const userValidation = require('../validations/user.validation');
-const userController = require('../controllers/user.controller');
+const express = require("express");
+const auth = require("../middlewares/auth");
+const validate = require("../middlewares/validate");
+const userValidation = require("../validations/user.validation");
+const userController = require("../controllers/user.controller");
+const { upload } = require("../middlewares/multerCloudnary");
 
 const router = express.Router();
 
@@ -11,20 +12,23 @@ router.use(auth());
 
 // Routes: get users, create user
 router
-  .route('/')
+  .route("/")
   .post(validate(userValidation.createUser), userController.createUser)
   .get(validate(userValidation.getUsers), userController.getUsers);
 
 // Routes: get one user, update user, delete user
 router
-  .route('/:userId')
+  .route("/:userId")
   .get(validate(userValidation.getUser), userController.getUser)
   .patch(validate(userValidation.updateUser), userController.updateUser)
   .delete(validate(userValidation.deleteUser), userController.deleteUser);
-
+router
+  .route("/profile/upload")
+  .put(upload.single("image"), userController.profileImage);
+router.route("/profile/remove").delete(userController.profileImageRemove);
 // Routes: update company
 router
-  .route('/org/:orgId')
+  .route("/org/:orgId")
   .patch(validate(userValidation.updateOrg), userController.updateOrg);
 
 module.exports = router;

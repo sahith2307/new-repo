@@ -1,6 +1,7 @@
 const httpStatus = require("http-status");
 const { User, Organization } = require("../models");
 const ApiError = require("../utils/ApiError");
+const { uploadToCloudinary } = require("./upload.service");
 
 /**
  * Create an organization
@@ -29,7 +30,7 @@ const createUser = async (userBody) => {
       "User already exists with this email"
     );
   }
-  return User.create(userBody);
+  return User.create({ ...userBody, gender: "None" });
 };
 
 /**
@@ -64,6 +65,35 @@ const getUserByEmail = async (email) => {
   return User.findOne({
     email,
   });
+};
+
+const updateProfileImage = async (userId, filePath, next) => {
+  const user = await getUserById(userId);
+  console.log(userId);
+  try {
+    let localFilePath = filePath;
+    let result = await uploadToCloudinary(localFilePath, "profileImages");
+
+    await User.updateOne({ _id: userId }, { $set: { image: result.url } });
+
+    return true;
+  } catch (error) {
+    error.status = 400;
+    next(error);
+  }
+};
+
+const removeProfileImage = async (userId) => {
+  const user = await getUserById(userId);
+  console.log(userId);
+  try {
+    await User.updateOne({ _id: userId }, { $set: { image: "" } });
+
+    return true;
+  } catch (error) {
+    error.status = 400;
+    next(error);
+  }
 };
 
 /**
@@ -136,4 +166,6 @@ module.exports = {
   updateUserById,
   updateOrgById,
   deleteUserById,
+  updateProfileImage,
+  removeProfileImage,
 };
