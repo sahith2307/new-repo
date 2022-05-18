@@ -3,11 +3,22 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const { private, paginate, softDelete } = require("./plugins");
 const { roles } = require("../config/roles");
+const Schema = mongoose.Schema;
 
 const userSchema = mongoose.Schema(
   {
     image: { type: String },
     name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastName: {
       type: String,
       required: true,
       trim: true,
@@ -18,6 +29,7 @@ const userSchema = mongoose.Schema(
       required: true,
       enum: ["Male", "Female", "Others", "None"],
     },
+
     email: {
       type: String,
       required: true,
@@ -30,6 +42,7 @@ const userSchema = mongoose.Schema(
         }
       },
     },
+    saved: [{ id: { type: Schema.Types.ObjectId, ref: "post" } }],
     password: {
       type: String,
       required: true,

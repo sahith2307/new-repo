@@ -4,6 +4,8 @@ const {
   getPostsByUserId,
   userLikePost,
   userDislikePost,
+  userSavedPost,
+  userUnSavePost,
 } = require("../services/posts.service");
 const {
   uploadToCloudinary,
@@ -91,6 +93,28 @@ const dislikePost = async (req, res, next) => {
   }
 };
 
+const savePost = async (req, res, next) => {
+  const { _id } = req.user;
+  const { postId } = req.params;
+  try {
+    userSavedPost(_id, postId);
+    res.status(201).send({ message: "you have liked" });
+  } catch (error) {
+    error.status = 400;
+    next(error);
+  }
+};
+const unSavePost = async (req, res, next) => {
+  const { _id } = req.user;
+  const { postId } = req.params;
+  try {
+    userUnSavePost(_id, postId);
+    res.status(201).send({ message: "you have liked" });
+  } catch (error) {
+    error.status = 400;
+    next(error);
+  }
+};
 module.exports = {
   uploadPost,
   getAllPosts,

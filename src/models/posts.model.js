@@ -7,6 +7,7 @@ const feedSchema = new Schema(
     image: { type: Array, required: true },
     caption: { type: String, required: false },
     likes: [{ id: { type: Schema.Types.ObjectId, ref: "comments" } }],
+    saved: [{ id: { type: Schema.Types.ObjectId, ref: "User" } }],
   },
   { timestamps: true }
 );

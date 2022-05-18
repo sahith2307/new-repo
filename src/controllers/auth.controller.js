@@ -9,6 +9,7 @@ const {
   googleService,
 } = require("../services");
 const { setNewPassword } = require("../services/auth.service");
+const User = require("../models/user.model");
 
 const register = catchAsync(async (req, res) => {
   // const org = await userService.createOrg(req.body);
@@ -16,6 +17,7 @@ const register = catchAsync(async (req, res) => {
   try {
     user = await userService.createUser({
       ...req.body,
+      name: req.body.firstName + " " + req.body.lastName,
     });
   } catch (e) {
     // await org.remove();
@@ -95,7 +97,10 @@ const verifyEmail = catchAsync(async (req, res) => {
 });
 
 const self = catchAsync(async (req, res) => {
-  res.send(req.user);
+  const getSelf = await User.findById(req.user._id, {
+    password: 0,
+  }).populate("saved.id");
+  res.send(getSelf);
 });
 
 module.exports = {
